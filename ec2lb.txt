@@ -1,0 +1,94 @@
+EC2 day2 notes. 10/18/2020
+
+Network Load Balancer 
+
+1. 2 kinds of Load Balancers: 1) NLB (Network Load Balancer)
+2. 7 levels of OSI (Open System Interconnection)
+3. AWS doc for NLB --> https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html
+4. 2 kinds of Schema: 1) Internet-facing and 2) Internal 
+5. In Target Group --> Target types: 1) Instance and 2) IP
+6. NLB handles spike of millions of hits within the seconds to instances.
+7. NLB works in OSI layer 4 which transport layer. 
+8. In order to register instances as healthy instances we must configure instances as WebServers (Apapche)
+9. Interview question --> How did you test your NLB? 
+Answer: I did create infinite loop using While Loop. 
+Syntax for my solution is like:
+while true;
+do 
+wget <Load Balancer DNS>
+done 
+10. How did I verify that traffic goes crazy --> Monitor the Load Balancer
+11. Final check: Target Group --> Check Targets if they are healthy or not. 
+
+==================================================================================================================
+
+Application Load Balancer
+
+Task: Create Scalable Environment. This Scalable Infra must be able to handle the traffic during the peak time and non peak time. 
+Because we wanna achive 0 downtime. 
+
+1. Doc about ALB --> https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html
+2. Configure ALB 
+3. Configure Launch Template, its just a Bootstrap script.
+4. Configure Auto Scaling Group 
+5. Download EPEL (Ecta Package Enterprise Linux)
+6. sudo amazon-linux-extras install epel -y
+7. sudo yum list | grep -i stress --> Cross check if stress utility available in yum package manager 
+8. sudo yum install -y stress 
+9. stress --cpu 2 --timeout 300
+10. We configure to keep CPU utilization at 40%. Once traffic reach back to 40% it will start cooldown period. Which means 
+it will go back to 2 Instances. which is desired capacity.
+11. Launc template --> UserData/Bootstrap script 
+#!/bin/bash
+yum update -y
+yum install -y httpd
+cd /var/www/html
+touch index.html
+echo "Welcome to ALB with Auto Scaling" > /var/www/html/index.html
+service httpd start
+chkconfig httpd on
+
+=======================================================================================================================
+1. Create GitHUb account 
+2. Never, never and never check in your sensitive info to Version Control(such as GitHUb,Gitlab or Bitbucket)
+3. You must be in the same directory of code 
+4. Create repo in GitHub UI 
+5. git config --global user.name "John Doe"
+6. git config --global user.email johndoe@example.com
+7. git init 
+8. git add .
+9. git commit -m "Commit Message"
+10. git remote add origin
+11. git push --set-upstream origin master
+12. git push --> for next pushes 
+
+End of Sprint demo:
+
+Create README.md file and add step by step description of what current CloudFormation template does. 
+
+
+
+Windows EC2 Instance 
+
+1. Port number to connect to Windows Instance is 3389, Remote Desktop Protocol (RDP)
+2. We need RDP installed in our local machine. 
+3. In order to get password copy pem file from local machine to AWS EC2 Console and click on decrypt 
+
+
+CloudFormation is AWS native DevOps tool. It's a IAC (Infrastructure as Code) or Immutable Infrastructure
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

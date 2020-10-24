@@ -1,0 +1,66 @@
+EC2 day1 notes. 10/17/2020
+
+1. EC2 (Elastic Cloud Compute) 
+2. In order to spin up EC2 instance we need AMI (Amazon Machine Image). It's an Operating System/
+Platform/Linux/Unix flavor. 
+3. There are 2 kind of Images (Public/Private).
+4. Private Images are Hardened (Encrypted) Images
+5. LTS (Long Term Suuport) means its a stable version. 
+6. Images are regional. Means Image ID is unique per region. 
+7. EBS (Elastic Block Store) used for persistent volumes or storage. 
+8. Drowback of EBS --> Only accessible within one AZ 
+
+Create our 1st Custom AMI 
+
+1. AMI comes with pre configured software 
+2. Once SSH into the Instace first thing we need to verify OS family/flavor
+3. In order to find out the OS family --> cat /etc/*-release or cat /etc/os-release 
+4. Most famous Package Manager for RedHat, Centos and Fedora is YUM. 
+5. Running commands with root user is not a good practice. Because we don't want to have wide open privileges in system. 
+6. Update packages from internet --> sudo yum update -y 
+7. Install Apache/PHP --> sudo yum install -y httpd php 
+8. Starte Apache/HTTPD service --> sudo service httpd start 
+9. Status Apache/HTTPD service --> sudo service httpd status 
+10. To start HTTPD at boot time --> sudo chkconfig httpd on
+
+Configure PHP 
+
+1. Add ec2-user to apache group --> sudo usermod -aG apache ec2-user 
+2. Change ownership of /var/www directory --> sudo chown -R ec2-user:apache /var/www 
+3. echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
+4. In order to create Private Image from existing EC2 instance --> Actions --> Image --> Create Image 
+5. Give a name and description to Image 
+6. On the left side bar under the Images --> AMIs --> find image 
+7. Spin up Instance from private image --> Actions --> Launch --> Follow the steps of EC2 configuration. 
+
+
+EC2 EBS 
+
+1. You can only attach 1 EBS volume to a single EC2 instance 
+2. EBS volume only available inside single AZ. For example: you can only attach the volume in the same AZ. 
+3. Delete on Termination by default disabled. We can enable like this.
+4. First click on storage and copy device name. Such as /dev/xvda or /dev/sda 
+5. SSH into the instce and create a file.json using vi text editor. 
+[
+    {
+        "DeviceName": "/dev/xvda",
+        "Ebs": {
+            "DeleteOnTermination": false
+        }
+    }
+]
+6. IAM--> Add User --> Programmatic access --> Save CSV file
+7. aws configure --> Copy and paste Access key Id and Secret Access key accordingly. 
+8. aws ec2 modify-instance-attribute --instance-id <Copy InstanceID> --block-device-mappings file://file.json 
+
+Attach volume to Ec2 instance and configure 
+
+1. lsblk --> Returns attached devices 
+2. mkfs -t ext4 <DeviceName> --> Creates file system 
+3. mdkir /data --> Create this absolute path to persist the data in the absolute path 
+4. mount /dev/xvdf /data/ --> Mount filesystem /data directory
+5. Run lsblk command again and check the output. 
+
+There are 2 kinds of storages: Persistent and Ephemeral.
+
+Ephemeral storage is a weak or vulnerable storage. Data is available only during the VM running time. 
