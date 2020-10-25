@@ -7,7 +7,7 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         }
     },
-    "Reasources": {
+    "Resources": {
         "VPC": {
             "Type": "AWS::EC2::VPC",
             "Properties": {
