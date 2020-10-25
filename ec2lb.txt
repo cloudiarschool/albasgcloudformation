@@ -78,6 +78,32 @@ Windows EC2 Instance
 CloudFormation is AWS native DevOps tool. It's a IAC (Infrastructure as Code) or Immutable Infrastructure
 
 
+=============================================
+
+Environments:
+
+California
+
+Australia
+
+England 
+
+To build modular code. But we can only use Current CF Template for Washington DC client. In order to minimize latency. 
+
+Hashicorp Vault
+
+================================================
+
+Homework October 31
+
+1. Let's open a dicussion regarding to ALBASG CloudFormation template. Debug it together and find the bugs causing the failure. 
+2. Take UserData/Bootstrap of Wordpress application and run in EC2 instance. Figure out why Wordpress web page doesn't come up. 
+  2.1 - Steps to debug - Google.
+  2.2 - Document your solution and push it to GitHub to Dev Branch 
+  2.3 - First GitHub GUI --> Branch --> Create New branch 
+  2.4 - Terminal "git branch" and run "git checkout -b"
+
+
 
 
 
