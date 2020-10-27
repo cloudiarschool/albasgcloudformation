@@ -1,9 +1,9 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This template creates VPC, ALB and ASG",
+    "Description": "Cloudiar ASG and ALB",
     "Parameters": {
         "WebServerKeyName": {
-            "Description": "This Key will be used to SSH into EC2 instances",
+            "Description": "This key will be used for EC2 Instances",
             "Type": "AWS::EC2::KeyPair::KeyName"
         }
     },
@@ -12,8 +12,8 @@
             "Type": "AWS::EC2::VPC",
             "Properties": {
                 "CidrBlock": "10.99.0.0/16",
-                "EnableDnsHostnames": true,
-                "EnableDnsSupport": true,
+                "EnableDnsHostnames": "true",
+                "EnableDnsSupport": "true",
                 "Tags": [
                     {
                         "Key": "Name",
@@ -24,14 +24,7 @@
         },
         "InternetGateway": {
             "Type": "AWS::EC2::InternetGateway",
-            "Properties": {
-                "Tags": [ 
-                    { 
-                        "Key": "Name", 
-                        "Value": "BlogIGW"
-                    } 
-                ]
-            }
+            "Properties": {}
         },
         "VPCGatewayAttachment": {
             "Type": "AWS::EC2::VPCGatewayAttachment",
@@ -53,7 +46,7 @@
                         {
                             "Fn::GetAZs": ""
                         }
-                    ]    
+                    ]
                 },
                 "CidrBlock": "10.99.1.0/24",
                 "VpcId": {
@@ -76,7 +69,7 @@
                         {
                             "Fn::GetAZs": ""
                         }
-                    ]    
+                    ]
                 },
                 "CidrBlock": "10.99.2.0/24",
                 "VpcId": {
@@ -99,7 +92,7 @@
                         {
                             "Fn::GetAZs": ""
                         }
-                    ]    
+                    ]
                 },
                 "CidrBlock": "10.99.11.0/24",
                 "VpcId": {
@@ -122,7 +115,7 @@
                         {
                             "Fn::GetAZs": ""
                         }
-                    ]    
+                    ]
                 },
                 "CidrBlock": "10.99.12.0/24",
                 "VpcId": {
@@ -172,7 +165,7 @@
                 }
             }
         },
-        "RoutePublicToIntternet": {
+        "RoutePublicNATToInternet": {
             "Type": "AWS::EC2::Route",
             "Properties": {
                 "RouteTableId": {
@@ -185,7 +178,7 @@
             },
             "DependsOn": "VPCGatewayAttachment"
         },
-        "NATElasticIp": {
+        "NATElasticIP": {
             "Type": "AWS::EC2::EIP",
             "Properties": {
                 "Domain": "vpc"
@@ -194,11 +187,11 @@
         },
         "NATGateway": {
             "Type": "AWS::EC2::NatGateway",
-            "DependsOn": "NATElasticIp",
+            "DependsOn": "NATElasticIP",
             "Properties": {
                 "AllocationId": {
                     "Fn::GetAtt": [
-                        "NATElasticIp",
+                        "NATElasticIP",
                         "AllocationId"
                     ]
                 },
@@ -363,7 +356,6 @@
                 "CidrBlock": "0.0.0.0/0"
             }
         },
-
         "DMZNACLEntryEgress100": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "DependsOn": "DMZNACL",
@@ -544,25 +536,6 @@
                 "CidrBlock": "0.0.0.0/0"
             }
         },
-
-        "AppNACLEntryEgress100": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "DependsOn": "AppNACL",
-            "Properties": {
-                "NetworkAclId": {
-                    "Ref": "AppNACL"
-                },
-                "RuleNumber": "100",
-                "Protocol": "6",
-                "PortRange": {
-                    "From": "22",
-                    "To": "22"
-                },
-                "RuleAction": "allow",
-                "Egress": "true",
-                "CidrBlock": "0.0.0.0/0"
-            }
-        },
         "AppNACLEntryEgress110": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "DependsOn": "AppNACL",
@@ -660,25 +633,24 @@
         "TargetGroup": {
             "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
             "Properties": {
-                "HealthCheckIntervalSeconds" : "10",
-                "HealthCheckPath" : "/phpinfo.php",
-                "HealthCheckPort" : "80",
-                "HealthCheckProtocol" : "HTTP",
-                "HealthyThresholdCount" : "2",
-                "Name" : "TG1",
-                "Port" : "80",
-                "Protocol" : "HTTP",
-                "UnhealthyThresholdCount" : "2",
-                "VpcId" : {
+                "HealthCheckIntervalSeconds": "10",
+                "HealthCheckPath": "/phpinfo.php",
+                "HealthCheckPort": "80",
+                "HealthCheckProtocol": "HTTP",
+                "HealthyThresholdCount": "2",
+                "Name": "TG1",
+                "Port": "80",
+                "Protocol": "HTTP",
+                "UnhealthyThresholdCount": "2",
+                "VpcId": {
                     "Ref": "VPC"
                 }
-
             }
         },
         "BastionSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "Description": "wordpress-bastion",
+                "GroupDescription": "wordpress-bastion",
                 "VpcId": {
                     "Ref": "VPC"
                 },
@@ -701,7 +673,7 @@
         "LoadBalancerSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "Description": "wordpress-alb",
+                "GroupDescription": "wordpress-elb",
                 "VpcId": {
                     "Ref": "VPC"
                 },
@@ -730,7 +702,7 @@
         "WebServerSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "Description": "wordpress-ec2",
+                "GroupDescription": "wordpress-ec2",
                 "VpcId": {
                     "Ref": "VPC"
                 },
@@ -742,44 +714,44 @@
                 ],
                 "SecurityGroupIngress": [
                     {
+                        "FromPort": 22,
+                        "IpProtocol": "tcp",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroup"
+                        },
+                        "ToPort": 22
+                    },
+                    {
                         "FromPort": 80,
                         "IpProtocol": "tcp",
                         "SourceSecurityGroupId": {
                             "Ref": "LoadBalancerSecurityGroup"
-                    },
-                         "ToPort": 80
+                        },
+                        "ToPort": 80
+                    }
+                ]
+            }
+        },
+        "LaunchConfiguration": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "DependsOn": "VPCGatewayAttachment",
+            "Properties": {
+                "ImageId": "ami-0947d2ba12ee1ff75",
+                "InstanceType": "t2.micro",
+                "SecurityGroups": [
+                    {
+                        "Ref": "WebServerSecurityGroup"
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "WebServerKeyName"
                 },
-                {
-                    "FromPort": 22,
-                    "IpProtocol": "tcp",
-                    "SourceSecurityGroupId": {
-                        "Ref": "BastionSecurityGroup"
-                    },
-                    "ToPort": 22
-                }
-            ]
-        }
-    },
-    "LaunchConfiguration": {
-        "Type": "AWS::AutoScaling::LaunchConfiguration",
-        "DependsOn": "VPCGatewayAttachment",
-        "Properties": {
-            "ImageId": "ami-0947d2ba12ee1ff75",
-            "InstanceType": "t2.micro",
-            "SecurityGroups": [
-                {
-                    "Ref": "WebServerSecurityGroup"
-                }
-            ],
-            "KeyName": {
-                "Ref": "WebServerKeyName"
-            },
-            "AssociatePublicIpAddress": "false",
-            "UserData": {
-                "Fn::Base64": {
-                    "Fn::Join": [
-                        "",
-                        [
+                "AssociatePublicIpAddress": "false",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
                             "#!/bin/bash\n",
                             "yum update -y\n",
                             "wget http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm\n",
@@ -799,99 +771,97 @@
                             "service mysqld start\n",
                             "systemctl enable mysqld.service\n",
                             "chkconfig mysqld on"
+                            ]
                         ]
-                    ]
-                }
-            },
-            "InstanceMonitoring": "true"
-        }
-
-    },
-    "AutoScalingGroup": {
-        "Type": "AWS::AutoScaling::AutoScalingGroup",
-        "Properties": {
-            "TargetGroupARNs": [
-                {
-                    "Ref": "TargetGroup"
-                }
-            ],
-            "LaunchConfigurationName": {
-                "Ref": "LaunchConfiguration"
-            },
-            "MinSize": "2",
-            "MaxSize": "10",
-            "DesiredCapacity": "3",
-            "Cooldown": "300",
-            "HealthCheckGracePeriod": "300",
-            "HealthCheckType": "ELB",
-            "VPCZoneIdentifier": [
-                {
-                    "Ref": "AppLayer1private"
-                },
-                {
-                    "Ref": "AppLayer2private"
-                }
-            ],
-            "Tags": [
-                {
-                    "PropagateAtLaunch": "true",
-                    "Value": "instance-wordpress",
-                    "Key": "Name"
-                }
-            ]
-        }
-    },
-    "BastionInstance": {
-        "Type": "AWS::EC2::Instance",
-        "Properties": {
-            "ImageId": "ami-0947d2ba12ee1ff75",
-            "InstanceType": "t2.micro",
-            "KeyName": {
-                "Ref": "WebServerKeyName"
-            },
-            "NetworkInterfaces": [
-                {
-                    "GroupSet": [
-                        {
-                            "Ref": "BastionSecurityGroup"
-                        }
-                    ],
-                    "AssociatePublicIpAddress": "true",
-                    "DeviceIndex": "0",
-                    "DeleteOnTermination": "true",
-                    "SubnetId": {
-                        "Ref" : "DMZ1public"
                     }
-                }
-            ],
-            "Tags": [
-                {
-                    "Value": "bastion-host",
-                    "Key": "Name"
-                }
-            ]
-        }
-    }
-},
-"Outputs": {
-    "pubIpAddress1": {
-        "Description": "Amigo return me public IP por favor",
-        "Value": {
-            "Fn::GetAtt": [
-                "BastionInstance",
-                "PublicIp"
-            ]
+                },
+                "InstanceMonitoring": "true"
+            }
+        },
+        "AutoScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "TargetGroupARNs": [
+                    {
+                        "Ref": "TargetGroup"
+                    }
+                ],
+                "LaunchConfigurationName": {
+                    "Ref": "LaunchConfiguration"
+                },
+                "MinSize": "2",
+                "MaxSize": "4",
+                "DesiredCapacity": "2",
+                "Cooldown": "300",
+                "HealthCheckGracePeriod": "300",
+                "HealthCheckType": "ELB",
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "AppLayer1private"
+                    },
+                    {
+                        "Ref": "AppLayer2private"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "PropagateAtLaunch": "true",
+                        "Value": "instance-wordpress",
+                        "Key": "Name"
+                    }
+                ]
+            }
+        },
+        "BastionInstance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "InstanceType": "t2.micro",
+                "ImageId": "ami-0947d2ba12ee1ff75",
+                "KeyName": {
+                    "Ref": "WebServerKeyName"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "GroupSet": [
+                            {
+                                "Ref": "BastionSecurityGroup"
+                            }
+                        ],
+                        "AssociatePublicIpAddress": "true",
+                        "DeviceIndex": "0",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "DMZ1public"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Value": "bastion-host",
+                        "Key": "Name"
+                    }
+                ]
+            }
         }
     },
-    "privIpAddress1": {
-        "Description": "Amigo return me private IP por favor",
-        "Value": {
-            "Fn::GetAtt": [
-                "BastionInstance",
-                "PrivateIp"
-            ]
+    "Outputs": {
+        "pubIpAddress1": {
+            "Description": "Public ip address of bastion instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BastionInstance",
+                    "PublicIp"
+                ]
+            }
+        },
+        "privIpAddress1": {
+            "Description": "Private ip address of bastion instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BastionInstance",
+                    "PrivateIp"
+                ]
+            }
         }
-    }
+   }
 }
-}
-

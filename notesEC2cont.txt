@@ -1,0 +1,6 @@
+10.27.2020 Tuesday beatiful day
+
+1. Difference between git and github. 
+  1.1. git is a client/agent/api(Application programming interface). git talks to remote repository or
+version control such as GitHub, Gitlab, Bitbucket. 
+  1.2. git programmatically talks to Version Control. 
